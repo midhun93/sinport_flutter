@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/bouncy_button.dart';
 
 class MapLocation {
   final String title;
@@ -92,11 +93,13 @@ class _MapScreenState extends State<MapScreen> {
       right: 20,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         child: Row(
           children: [
-            _buildRoundIconButton(Icons.search, const Color(0xffF6C445), onTap: () {
-              setState(() => isSearching = true);
-            }),
+            BouncyButton(
+              onTap: () => setState(() => isSearching = true),
+              child: _buildRoundIconButton(Icons.search, const Color(0xffF6C445)),
+            ),
             const SizedBox(width: 12),
             _buildCategoryButton(Icons.shopping_bag_outlined, "Shopping"),
             const SizedBox(width: 12),
@@ -109,36 +112,36 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _buildRoundIconButton(IconData icon, Color color, {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Icon(icon, color: Colors.black, size: 24),
+  Widget _buildRoundIconButton(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
       ),
+      child: Icon(icon, color: Colors.black, size: 24),
     );
   }
 
   Widget _buildCategoryButton(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.black, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
-          ),
-        ],
+    return BouncyButton(
+      onTap: () {},
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.black, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -164,44 +167,50 @@ class _MapScreenState extends State<MapScreen> {
           top: MediaQuery.of(context).size.height * 0.38,
           child: Column(
             children: [
-              _buildRoundIconButton(Icons.add, Colors.white),
+              BouncyButton(child: _buildRoundIconButton(Icons.add, Colors.white)),
               const SizedBox(height: 12),
-              _buildRoundIconButton(Icons.remove, Colors.white),
+              BouncyButton(child: _buildRoundIconButton(Icons.remove, Colors.white)),
             ],
           ),
         ),
         Positioned(
           right: 20,
           bottom: showDetail || isNavigating ? 230 : 130,
-          child: _buildRoundIconButton(Icons.my_location, Colors.white, onTap: () {
-            if (selectedLocation == null) {
+          child: BouncyButton(
+            onTap: () {
+              if (selectedLocation == null) {
                 setState(() => selectedLocation = locations[0]);
-            }
-            setState(() => showDetail = !showDetail);
-          }),
+              }
+              setState(() => showDetail = !showDetail);
+            },
+            child: _buildRoundIconButton(Icons.my_location, Colors.white),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildFloorButton(String label, bool active) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.white.withOpacity(0.2),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active ? Colors.black : Colors.black45,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+    return BouncyButton(
+      onTap: () {},
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: active ? Colors.white : Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active ? Colors.black : Colors.black45,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -232,67 +241,79 @@ class _MapScreenState extends State<MapScreen> {
       bottom: 110,
       left: 16,
       right: 16,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      selectedLocation?.title ?? "",
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-                      onPressed: () => setState(() => showDetail = false),
-                    )
-                  ],
-                ),
-                Text(selectedLocation?.category ?? "", 
-                  style: const TextStyle(color: Colors.grey, fontSize: 16)),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    _buildSquareIcon(Icons.share_outlined),
-                    const SizedBox(width: 16),
-                    _buildSquareIcon(Icons.bookmark_outlined),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                showDetail = false;
-                isNavigating = true;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutBack,
+        tween: Tween(begin: 0.0, end: 1.0),
+        builder: (context, value, child) {
+          final clampedValue = value.clamp(0.0, 1.0);
+          return Transform.translate(
+            offset: Offset(0, 100 * (1 - clampedValue)),
+            child: Opacity(opacity: clampedValue, child: child),
+          );
+        },
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
-                color: Color(0xffF6C445),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Build a route", 
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
-                  Icon(Icons.north_east, size: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        selectedLocation?.title ?? "",
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                      BouncyButton(
+                        onTap: () => setState(() => showDetail = false),
+                        child: const Icon(Icons.close, color: Colors.grey, size: 28),
+                      ),
+                    ],
+                  ),
+                  Text(selectedLocation?.category ?? "", 
+                    style: const TextStyle(color: Colors.grey, fontSize: 16)),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      BouncyButton(child: _buildSquareIcon(Icons.share_outlined)),
+                      const SizedBox(width: 16),
+                      BouncyButton(child: _buildSquareIcon(Icons.bookmark_outlined)),
+                    ],
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+            BouncyButton(
+              onTap: () {
+                setState(() {
+                  showDetail = false;
+                  isNavigating = true;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                decoration: const BoxDecoration(
+                  color: Color(0xffF6C445),
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Build a route", 
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+                    Icon(Icons.north_east, size: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -323,7 +344,7 @@ class _MapScreenState extends State<MapScreen> {
                   Expanded(
                     child: TextField(
                       onChanged: (val) => setState(() => searchQuery = val),
-                      cursorColor: Color(0xffF6C445),
+                      cursorColor: const Color(0xffF6C445),
                       style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w400),
                       decoration: const InputDecoration(
                         hintText: "Where do you want to go?",
@@ -333,7 +354,7 @@ class _MapScreenState extends State<MapScreen> {
                       autofocus: true,
                     ),
                   ),
-                  GestureDetector(
+                  BouncyButton(
                     onTap: () => setState(() {
                         isSearching = false;
                         searchQuery = "";
@@ -351,31 +372,43 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
             Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 32),
-                    Text(
-                      searchQuery.isEmpty ? "You have already looked" : "Search results", 
-                      style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.w500)
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: filteredLocations.length,
-                        itemBuilder: (context, index) {
-                            final loc = filteredLocations[index];
-                            return _buildSearchItem(loc);
-                        },
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 200 * (1 - value)),
+                    child: child,
+                  );
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 32),
+                      Text(
+                        searchQuery.isEmpty ? "You have already looked" : "Search results", 
+                        style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.w500)
                       ),
-                    )
-                  ],
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: filteredLocations.length,
+                          itemBuilder: (context, index) {
+                              final loc = filteredLocations[index];
+                              return _buildSearchItem(loc);
+                          },
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
             )
@@ -388,7 +421,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildSearchItem(MapLocation loc) {
     return Column(
       children: [
-        GestureDetector(
+        BouncyButton(
           onTap: () {
               setState(() {
                   selectedLocation = loc;
@@ -429,21 +462,29 @@ class _MapScreenState extends State<MapScreen> {
       top: 20,
       left: 20,
       right: 20,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        decoration: BoxDecoration(
-          color: const Color(0xffF6C445),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.turn_left, size: 40),
-            SizedBox(width: 20),
-            Text(
-              "100 m turn left",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-            ),
-          ],
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.elasticOut,
+        tween: Tween(begin: 0.0, end: 1.0),
+        builder: (context, value, child) {
+          return Transform.scale(scale: value, child: child);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          decoration: BoxDecoration(
+            color: const Color(0xffF6C445),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.turn_left, size: 40),
+              SizedBox(width: 20),
+              Text(
+                "100 m turn left",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -454,44 +495,56 @@ class _MapScreenState extends State<MapScreen> {
       bottom: 110,
       left: 16,
       right: 16,
-      child: Container(
-        padding: const EdgeInsets.all(28),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavStat("10:00", "Arrival"),
-                Container(width: 1.5, height: 45, color: const Color(0xffEEEEEE)),
-                _buildNavStat("1 km", "Distance"),
-                Container(width: 1.5, height: 45, color: const Color(0xffEEEEEE)),
-                _buildNavStat("5 min", "On the way"),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Cancel", 
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-                GestureDetector(
-                  onTap: () => setState(() => isNavigating = false),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      shape: BoxShape.circle,
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        tween: Tween(begin: 0.0, end: 1.0),
+        builder: (context, value, child) {
+          final clampedValue = value.clamp(0.0, 1.0);
+          return Transform.translate(
+            offset: Offset(0, 100 * (1 - clampedValue)),
+            child: child,
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavStat("10:00", "Arrival"),
+                  Container(width: 1.5, height: 45, color: const Color(0xffEEEEEE)),
+                  _buildNavStat("1 km", "Distance"),
+                  Container(width: 1.5, height: 45, color: const Color(0xffEEEEEE)),
+                  _buildNavStat("5 min", "On the way"),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Cancel", 
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                  BouncyButton(
+                    onTap: () => setState(() => isNavigating = false),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, size: 20),
                     ),
-                    child: const Icon(Icons.close, size: 20),
-                  ),
-                )
-              ],
-            )
-          ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
