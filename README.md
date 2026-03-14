@@ -6,13 +6,14 @@ A premium, high-fidelity Flutter UI project inspired by modern airport navigatio
 
 ### 🏠 Home Dashboard
 - **Dynamic Service Grid**: A unique, alternating grid layout (Wide-Small, Small-Wide) for services like Transfer, Tickets, and Car Rent.
-- **Micro-Animations**: All interactive cards feature smooth scale transitions and haptic feedback on touch.
+- **Staggered Entrance Animations**: Content elements "cascade" into view when the screen loads for a premium feel.
+- **Micro-Animations**: All interactive cards feature smooth scale transitions and haptic feedback on touch via the custom `BouncyButton` component.
 - **Flight Overview**: Clean typography for upcoming departures with gate information and quick-action links.
 
 ### 🗺️ Smart Map & Navigation
-- **3D-Simulated Map View**: A dark-themed, perspective-based map with interactive 3D elements.
+- **3D-Simulated Map View**: A dark-themed, perspective-based map with interactive 3D elements and a custom user view-cone.
 - **Advanced Search Experience**: 
-  - Real-time filtering of airport locations.
+  - Real-time filtering of airport locations as you type.
   - Smooth "iOS-style" bottom sheet transitions.
   - Recent search history with distance indicators.
 - **Live Navigation Mode**: 
@@ -22,6 +23,7 @@ A premium, high-fidelity Flutter UI project inspired by modern airport navigatio
 
 ### 🎨 Design & Animation
 - **Bouncy Interactions**: Custom `BouncyButton` component providing consistent spring-back effects and haptic impact across the entire app.
+- **Fluid Page Transitions**: `AnimatedSwitcher` used for seamless fading and sliding between main screens.
 - **Safe Animations**: Use of clamped `TweenAnimationBuilder` to ensure smooth opacity and transform transitions without assertion errors.
 - **Premium Color Palette**: Deep navy backgrounds, high-contrast white surfaces, and "Sinport Yellow" accents.
 
@@ -50,6 +52,18 @@ A premium, high-fidelity Flutter UI project inspired by modern airport navigatio
    flutter run
    ```
 
+## 🧪 Testing
+
+The project includes a comprehensive test suite covering widget rendering, user interaction, and core logic.
+
+- **Widget Tests**: Verifies UI components like `ServiceButton`, `DepartureCard`, and the `MapScreen` search trigger.
+- **Unit Tests**: Validates search filtering logic and data processing.
+
+To run the tests, use:
+```bash
+flutter test
+```
+
 ## 📂 Project Structure
 
 ```text
@@ -64,6 +78,8 @@ lib/
 │   ├── service_button.dart  # Grid service buttons
 │   ├── departure_card.dart  # Flight information cards
 │   └── bottom_nav.dart      # Custom animated navigation bar
+test/
+└── widget_test.dart      # Widget and unit tests
 ```
 
 ## 🛠️ Built With

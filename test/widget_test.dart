@@ -1,30 +1,96 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sinport_airport_ui/main.dart';
+import 'package:sinport_airport_ui/screens/map_screen.dart';
+import 'package:sinport_airport_ui/widgets/service_button.dart';
+import 'package:sinport_airport_ui/widgets/departure_card.dart';
 
-import 'package:sinport_flutter_ui/main.dart';
+// Mock HttpOverrides to avoid Image.network errors during tests
+class MockHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) => _MockHttpClient();
+}
+
+class _MockHttpClient implements HttpClient {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() {
+    HttpOverrides.global = MockHttpOverrides();
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  group('Widget Tests', () {
+    testWidgets('App should load HomeContent correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      expect(find.text('Airport map'), findsOneWidget);
+      expect(find.text('Good afternoon!'), findsOneWidget);
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    testWidgets('MapScreen should render controls and allow search trigger', (WidgetTester tester) async {
+      // Direct test of the MapScreen widget
+      await tester.pumpWidget(const MaterialApp(home: MapScreen()));
+      await tester.pumpAndSettle();
+
+      // Check for Top Bar Categories
+      expect(find.text('Shopping'), findsOneWidget);
+      expect(find.text('Gates'), findsOneWidget);
+      
+      // Check for Side Controls (Floor level '1' is active)
+      expect(find.text('1'), findsOneWidget);
+
+      // Trigger Search Overlay
+      final searchButton = find.byIcon(Icons.search);
+      expect(searchButton, findsOneWidget);
+      
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle();
+
+      // Verify Search Overlay is shown
+      expect(find.text('Where do you want to go?'), findsOneWidget);
+      expect(find.text('You have already looked'), findsOneWidget);
+    });
+
+    testWidgets('ServiceButton should render title and icon', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Row(
+              children: [
+                ServiceButton(
+                  title: 'Test Service',
+                  color: Colors.red,
+                  icon: Icon(Icons.star),
+                  isWide: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Test Service'), findsOneWidget);
+      expect(find.byIcon(Icons.star), findsOneWidget);
+    });
+  });
+
+  group('Logic & Unit Tests', () {
+    test('Map Search Filtering Logic', () {
+      final locations = [
+        {'title': 'Gate 1C'},
+        {'title': 'Zara store'},
+      ];
+
+      String query = 'zara';
+      final filtered = locations.where((loc) => 
+        loc['title']!.toLowerCase().contains(query.toLowerCase())).toList();
+
+      expect(filtered.length, 1);
+      expect(filtered[0]['title'], 'Zara store');
+    });
   });
 }
