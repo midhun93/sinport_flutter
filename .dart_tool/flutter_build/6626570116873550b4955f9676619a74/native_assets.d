@@ -1,0 +1,1 @@
+ /Users/midhun/Documents/Projects/Personal\ Projects/sinport_flutter/.dart_tool/flutter_build/6626570116873550b4955f9676619a74/native_assets.yaml: 
