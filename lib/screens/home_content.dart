@@ -7,138 +7,154 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-
         children: [
-
+          const SizedBox(height: 20),
           const Text(
             "Good afternoon!",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 22,
               color: Colors.grey,
+              fontWeight: FontWeight.w400,
             ),
           ),
-
-          const SizedBox(height: 6),
-
-          Row(
+          const SizedBox(height: 8),
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 "Airport map",
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 42,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              Icon(Icons.north_east, color: Colors.amber)
+              Icon(Icons.north_east, color: Color(0xffF6C445), size: 38)
             ],
           ),
-
-          const SizedBox(height: 30),
-
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 2.2,
-
-            children: const [
-
-              ServiceButton(
+          const SizedBox(height: 32),
+          
+          // Row 1
+          Row(
+            children: [
+              const ServiceButton(
                 title: "Transfer",
                 color: Color(0xffF6C445),
-                icon: Icons.sync_alt,
+                isWide: true,
+                icon: Icon(Icons.taxi_alert_rounded, size: 28),
               ),
-
+              const SizedBox(width: 16),
               ServiceButton(
-                title: "Hotel",
-                color: Color(0xffECECEC),
-                icon: Icons.hotel,
-                darkIcon: true,
+                color: Colors.white,
+                icon: Image.network(
+                  "https://cdn-icons-png.flaticon.com/512/3009/3009489.png",
+                  width: 32,
+                  height: 32,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.hotel, color: Colors.black),
+                ),
               ),
-
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Row 2
+          Row(
+            children: [
               ServiceButton(
-                title: "Baggage",
-                color: Color(0xffECECEC),
-                icon: Icons.luggage,
-                darkIcon: true,
+                color: Colors.white,
+                icon: Image.network(
+                  "https://cdn-icons-png.flaticon.com/512/2961/2961571.png",
+                  width: 32,
+                  height: 32,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.luggage, color: Colors.black),
+                ),
               ),
-
-              ServiceButton(
+              const SizedBox(width: 16),
+              const ServiceButton(
                 title: "Tickets",
                 color: Color(0xffFF5A5A),
-                icon: Icons.confirmation_num,
+                isWide: true,
+                icon: Icon(Icons.confirmation_num, size: 28),
               ),
-
-              ServiceButton(
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Row 3
+          Row(
+            children: [
+              const ServiceButton(
                 title: "Car Rent",
-                color: Color(0xff7ED387),
-                icon: Icons.directions_car,
+                color: Color(0xff8DEE9D),
+                isWide: true,
+                icon: Icon(Icons.directions_car_filled, size: 28),
               ),
-
+              const SizedBox(width: 16),
               ServiceButton(
-                title: "Chat",
-                color: Color(0xffECECEC),
-                icon: Icons.chat,
-                darkIcon: true,
+                color: Colors.white,
+                icon: Image.network(
+                  "https://cdn-icons-png.flaticon.com/512/2462/2462719.png",
+                  width: 32,
+                  height: 32,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.chat_bubble, color: Colors.black),
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 35),
+          const SizedBox(height: 48),
 
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-
+            children: [
               Text(
                 "Upcoming departures",
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
                 ),
               ),
-
               Row(
                 children: [
                   Text(
                     "View all",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                   SizedBox(width: 6),
-                  Icon(Icons.north_east, color: Colors.amber, size: 18)
+                  Icon(Icons.north_east, color: Color(0xffF6C445), size: 20)
                 ],
               )
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
           const DepartureCard(
-            from: "Singapore",
+            from: "Singapoure",
             to: "San Francisco",
             time: "27 Aug 2022 13:22",
+            gate: "Gate 1C",
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
+          
+          const Divider(color: Colors.white10, height: 1),
+          
+          const SizedBox(height: 24),
 
           const DepartureCard(
-            from: "Singapore",
+            from: "Singapoure",
             to: "New York",
             time: "27 Aug 2022 14:11",
+            gate: "Gate 2B",
           ),
 
-          const SizedBox(height: 100),
+          const SizedBox(height: 120),
         ],
       ),
     );

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ServiceButton extends StatefulWidget {
-
-  final String title;
+  final String? title;
   final Color color;
-  final IconData icon;
-  final bool darkIcon;
+  final Widget icon;
+  final bool isWide;
 
   const ServiceButton({
     super.key,
-    required this.title,
+    this.title,
     required this.color,
     required this.icon,
-    this.darkIcon = false,
+    this.isWide = false,
   });
 
   @override
@@ -20,47 +19,42 @@ class ServiceButton extends StatefulWidget {
 }
 
 class _ServiceButtonState extends State<ServiceButton> {
-
   double scale = 1;
 
   @override
   Widget build(BuildContext context) {
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => scale = 0.95),
-      onTapUp: (_) => setState(() => scale = 1),
-      onTapCancel: () => setState(() => scale = 1),
-
-      child: AnimatedScale(
-        scale: scale,
-        duration: const Duration(milliseconds: 120),
-
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-
-          decoration: BoxDecoration(
-            color: widget.color,
-            borderRadius: BorderRadius.circular(22),
-          ),
-
-          child: Row(
-            children: [
-
-              Icon(
-                widget.icon,
-                color: widget.darkIcon ? Colors.black : Colors.black,
-              ),
-
-              const SizedBox(width: 12),
-
-              Text(
-                widget.title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.darkIcon ? Colors.black : Colors.black,
-                ),
-              )
-            ],
+    return Expanded(
+      flex: widget.isWide ? 2 : 1,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => scale = 0.92),
+        onTapUp: (_) => setState(() => scale = 1),
+        onTapCancel: () => setState(() => scale = 1),
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 100),
+          child: Container(
+            height: 85,
+            decoration: BoxDecoration(
+              color: widget.color,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: widget.isWide
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      widget.icon,
+                      const SizedBox(width: 12),
+                      Text(
+                        widget.title ?? "",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      )
+                    ],
+                  )
+                : Center(child: widget.icon),
           ),
         ),
       ),
