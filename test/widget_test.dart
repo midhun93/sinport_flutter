@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +15,41 @@ class MockHttpOverrides extends HttpOverrides {
 
 class _MockHttpClient implements HttpClient {
   @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #createHttpClient) return _MockHttpClient();
+    if (invocation.memberName == #getUrl) return _MockHttpClientRequest();
+    if (invocation.memberName == #openUrl) return _MockHttpClientRequest();
+    return null;
+  }
+}
+
+class _MockHttpClientRequest implements HttpClientRequest {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => _MockHttpClientResponse();
+}
+
+class _MockHttpClientResponse extends Mock implements HttpClientResponse {
+  @override
+  int get statusCode => 200;
+
+  @override
+  int get contentLength => 0;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+    return const Stream<List<int>>.empty().listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
+}
+
+// Simple Mock class to satisfy implementation requirements
+class Mock {
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
@@ -22,49 +58,90 @@ void main() {
     HttpOverrides.global = MockHttpOverrides();
   });
 
-  group('Widget Tests', () {
-    testWidgets('App should load HomeContent correctly', (WidgetTester tester) async {
+  group('General App Tests', () {
+    testWidgets('App navigation from Home to Map should work', (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
 
+      // Verify we are on Home
       expect(find.text('Airport map'), findsOneWidget);
-      expect(find.text('Good afternoon!'), findsOneWidget);
-    });
 
-    testWidgets('MapScreen should render controls and allow search trigger', (WidgetTester tester) async {
-      // Direct test of the MapScreen widget
+      // Find the Map button in BottomNav
+      final mapIcon = find.byIcon(Icons.map_outlined);
+      expect(mapIcon, findsOneWidget);
+
+      await tester.tap(mapIcon);
+      await tester.pumpAndSettle();
+
+      // Verify MapScreen components are now visible
+      expect(find.text('Shopping'), findsOneWidget);
+    });
+  });
+
+  group('MapScreen Coverage Tests', () {
+    testWidgets('MapScreen interaction: floor levels and zoom', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: MapScreen()));
       await tester.pumpAndSettle();
 
-      // Check for Top Bar Categories
-      expect(find.text('Shopping'), findsOneWidget);
-      expect(find.text('Gates'), findsOneWidget);
-      
-      // Check for Side Controls (Floor level '1' is active)
-      expect(find.text('1'), findsOneWidget);
-
-      // Trigger Search Overlay
-      final searchButton = find.byIcon(Icons.search);
-      expect(searchButton, findsOneWidget);
-      
-      await tester.tap(searchButton);
+      await tester.tap(find.text('2'));
       await tester.pumpAndSettle();
 
-      // Verify Search Overlay is shown
-      expect(find.text('Where do you want to go?'), findsOneWidget);
-      expect(find.text('You have already looked'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.my_location));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gate 1C'), findsOneWidget);
+      expect(find.text('Build a route'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Build a route'), findsNothing);
     });
 
-    testWidgets('ServiceButton should render title and icon', (WidgetTester tester) async {
+    testWidgets('MapScreen search filtering and selection', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: MapScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'zara');
+      await tester.pump();
+
+      expect(find.text('Zara store'), findsOneWidget);
+      expect(find.text('McDonald\'s'), findsNothing);
+
+      await tester.tap(find.text('Zara store'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Zara store'), findsNWidgets(1));
+      expect(find.text('Build a route'), findsOneWidget);
+
+      await tester.tap(find.text('Build a route'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('100 m turn left'), findsOneWidget);
+      expect(find.text('Arrival'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Arrival'), findsNothing);
+    });
+  });
+
+  group('Widget Component Tests', () {
+    testWidgets('ServiceButton basic rendering', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: Row(
               children: [
                 ServiceButton(
-                  title: 'Test Service',
-                  color: Colors.red,
-                  icon: Icon(Icons.star),
+                  title: 'Transfer',
+                  color: Colors.amber,
+                  icon: Icon(Icons.taxi_alert),
                   isWide: true,
                 ),
               ],
@@ -72,25 +149,24 @@ void main() {
           ),
         ),
       );
-
-      expect(find.text('Test Service'), findsOneWidget);
-      expect(find.byIcon(Icons.star), findsOneWidget);
+      expect(find.text('Transfer'), findsOneWidget);
     });
-  });
 
-  group('Logic & Unit Tests', () {
-    test('Map Search Filtering Logic', () {
-      final locations = [
-        {'title': 'Gate 1C'},
-        {'title': 'Zara store'},
-      ];
-
-      String query = 'zara';
-      final filtered = locations.where((loc) => 
-        loc['title']!.toLowerCase().contains(query.toLowerCase())).toList();
-
-      expect(filtered.length, 1);
-      expect(filtered[0]['title'], 'Zara store');
+    testWidgets('DepartureCard basic rendering', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DepartureCard(
+              from: 'SG',
+              to: 'NY',
+              time: '12:00',
+              gate: 'A1',
+            ),
+          ),
+        ),
+      );
+      expect(find.text('SG - NY'), findsOneWidget);
+      expect(find.text('A1'), findsOneWidget);
     });
   });
 }
